@@ -2,6 +2,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.csv
+#*.csv No me´l llegia quan el volia passar a GitHub
 *.xlsx
 .env
