@@ -1,4 +1,4 @@
-# Si no tens instal·lades aquestes llibreries, executa:
+# Si no tens instal·lades aquestes llibreries, executa: 
 # !pip install requests beautifulsoup4 pandas
 
 import requests
@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import re
 import time
-import os  
+import os
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
@@ -31,28 +31,20 @@ def get_articles_from_section(section, label_section=""):
     """
     articles = []
 
-    # Ex. busquem tots els <a> amb href i classe 'dcr-*' (segons els exemples)
-    # o simplement tots els <a> amb href i aria-label:
     a_tags = section.find_all("a", href=True)
 
     for a in a_tags:
         link = a["href"]
 
-        # Filtra enllaços interns o sense sentit
         if not link.startswith("/"):
-            # The Guardian acostuma a tenir enllaços interns tipus "/technology/2025..."
             continue
 
-        # Reconstrueix l'URL complet si cal
         full_url = BASE_URL + link
 
-        # Títol: o bé aria-label o bé el text intern de l'etiqueta
         title = a.get("aria-label", "").strip()
         if not title:
-            # Si aria-label és buit, prova amb el text
             title = a.get_text(strip=True)
 
-        # Salta si no hi ha títol
         if not title:
             continue
 
@@ -68,23 +60,13 @@ def get_articles_from_section(section, label_section=""):
 # 2) LOCALITZAR LES SECCIONS QUE T’INTERESSEN
 # --------------------------------------------
 
-# Exemples (adapta-ho al que trobis a la pàgina):
-# - 'spotlight' pot aparèixer a data-link-name, data-component, etc.
-# - 'smartphone reviews' pot ser a data-link-name="smartphone reviews"
-
-# Pots buscar TOTES les <section> i després filtrar-ne algunes
 all_sections = soup.find_all("section")
 articles_info = []
 
 for sec in all_sections:
-    # Mira si la section té un data-link-name o data-component que t'interessa
-    # Exemples: "technology", "spotlight", "smartphone reviews", "review", etc.
-
     data_link_name = sec.get("data-link-name", "")
     data_component = sec.get("data-component", "")
 
-    # Comprovem si conté alguna paraula clau
-    # (adapta-ho a les paraules que hagis vist: 'spotlight', 'feature', 'smartphone reviews', etc.)
     if any(keyword in data_link_name.lower() for keyword in ["technology", "spotlight", "smartphone", "review"]):
         label = data_link_name or data_component
         articles = get_articles_from_section(sec, label_section=label)
@@ -93,6 +75,7 @@ for sec in all_sections:
 # --------------------------------------------
 # 3) ACCEDIR ALS ARTICLES PER EXTREURE AUTOR, DATA, ETC.
 # --------------------------------------------
+
 extended_articles_data = []
 
 for item in articles_info:
@@ -111,23 +94,19 @@ for item in articles_info:
 
         # DATA
         time_tag = article_soup.find("time")
-        pub_date = time_tag.get("datetime") if time_tag else None
+        pub_date = time_tag.get("datetime") if time_tag else "Not available"
 
-        # PRIMER PARÀGRAF COM A RESUM
-        body_div = article_soup.find("div", class_="content__article-body")
-        if body_div:
-            p_tags = body_div.find_all("p")
-            summary = p_tags[0].get_text(strip=True) if p_tags else None
-        else:
-            summary = None
+        # SUBTÍTOL
+        meta_subtitle = article_soup.find("meta", attrs={"name": "description"})
+        subtitle = meta_subtitle.get("content") if meta_subtitle else None
 
         extended_articles_data.append({
             "section_type": section_type,
             "headline": headline,
+            "subtitle": subtitle,
             "url": article_url,
             "author": author,
-            "publication_date": pub_date,
-            "summary": summary
+            "publication_date": pub_date
         })
 
         time.sleep(1)  # Evitar saturar el servidor
@@ -149,3 +128,4 @@ output_path = os.path.join(output_dir, 'guardian_articles.csv')
 df.to_csv(output_path, index=False, encoding="utf-8")
 
 print(f"Resultats desats a: {output_path}")
+
