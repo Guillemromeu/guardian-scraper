@@ -51,7 +51,7 @@ No admet paràmetres externs per línia de comandament. L'execució és automàt
 
 ## **4. DOI del dataset**
 
-📄 Dataset publicat a Zenodo: [Hem dincloure el DOI aquí quan estigui disponible]
+📄 Dataset publicat a Zenodo: DOI 10.5281/zenodo.15170520
 
 ---
 
