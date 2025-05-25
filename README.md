@@ -1,4 +1,4 @@
-# **PAC2: Tech Trends from The Guardian**
+# **Pràctica 1: Tech Trends from The Guardian**
 
 ## **1. Integrants del grup**
 
